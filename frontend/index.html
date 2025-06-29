@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TorTrack - Torrent Downloader</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-blue-400 mb-2">TorTrack</h1>
+            <p class="text-gray-400">Search and download movies & TV shows</p>
+        </header>
+
+        <!-- Search Section -->
+        <div class="max-w-2xl mx-auto mb-8">
+            <form id="searchForm" class="flex gap-2">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Search for movies or TV shows..."
+                    class="flex-1 px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:border-blue-500 text-white placeholder-gray-400"
+                    required
+                >
+                <button 
+                    type="submit" 
+                    class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                >
+                    Search
+                </button>
+            </form>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loading" class="hidden text-center py-8">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            <p class="mt-4 text-gray-400">Searching...</p>
+        </div>
+
+        <!-- Error Message -->
+        <div id="error" class="hidden max-w-2xl mx-auto mb-8">
+            <div class="bg-red-900/50 border border-red-700 text-red-300 px-4 py-3 rounded-lg">
+                <p id="errorMessage"></p>
+            </div>
+        </div>
+
+        <!-- Search Results -->
+        <div id="results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Results will be populated here -->
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html> 

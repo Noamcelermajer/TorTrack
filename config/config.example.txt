@@ -1,0 +1,18 @@
+# Configuration Template for TorTrack
+# Copy this file to .env and fill in your actual values
+
+# Prowlarr Configuration
+PROWLARR_URL=http://localhost:9696
+PROWLARR_API_KEY=your_prowlarr_api_key_here
+
+# TMDb Configuration
+TMDB_API_KEY=your_tmdb_api_key_here
+
+# qBittorrent Configuration
+QBITTORRENT_URL=http://localhost:8080
+QBITTORRENT_USERNAME=admin
+QBITTORRENT_PASSWORD=adminpass
+
+# Flask Configuration
+FLASK_ENV=development
+FLASK_DEBUG=1 

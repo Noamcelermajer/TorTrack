@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  tortrack:
+    build: ./backend
+    container_name: tortrack-app
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - PROWLARR_URL=${PROWLARR_URL:-http://prowlarr:9696}
+      - PROWLARR_API_KEY=${PROWLARR_API_KEY}
+      - TMDB_API_KEY=${TMDB_API_KEY}
+      - QBITTORRENT_URL=http://qbittorrent:8080
+      - QBITTORRENT_USERNAME=${QBITTORRENT_USERNAME:-admin}
+      - QBITTORRENT_PASSWORD=${QBITTORRENT_PASSWORD:-adminpass}
+    volumes:
+      - ./frontend:/app/frontend:ro
+      - ./config/.env:/app/.env:ro
+    depends_on:
+      - qbittorrent
+    networks:
+      - tortrack-network
+    restart: unless-stopped
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: tortrack-qbittorrent
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=UTC
+      - WEBUI_PORT=8080
+    volumes:
+      - ./config/qbittorrent:/config
+      - ./downloads:/downloads
+    ports:
+      - "8080:8080"
+      - "6881:6881"
+      - "6881:6881/udp"
+    networks:
+      - tortrack-network
+    restart: unless-stopped
+
+networks:
+  tortrack-network:
+    driver: bridge
+
+volumes:
+  qbittorrent-config:
+  downloads: 
