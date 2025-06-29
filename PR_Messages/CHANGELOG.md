@@ -7,6 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2025-06-29
+
+### Sprint 2: Prowlarr Integration & Smart Downloads
+
+#### Added
+- **Prowlarr Integration**: Full integration with Prowlarr API for torrent search
+- **Real Search Results**: Live torrent search with 275+ indexers via Prowlarr
+- **Smart Download Paths**: Automatic categorization (TV shows → C:/shows, Movies → C:/movies)
+- **qBittorrent Integration**: Complete download functionality with API integration
+- **Sequential Downloads**: Enabled first/last piece priority for faster streaming
+- **Search Optimization**: Limited to top 50 results sorted by quality and seeders
+- **Quality Detection**: Automatic quality extraction (4K, 1080p, BluRay, etc.)
+- **Seeder Health Indicators**: Color-coded seeder counts (green/yellow/red)
+- **Category Parsing**: Intelligent category detection from Prowlarr data
+- **Error Handling**: Comprehensive error handling for API failures
+- **Download Feedback**: Success/error messages for download attempts
+
+#### Enhanced
+- **Search Performance**: Faster results with intelligent sorting and limiting
+- **UI Improvements**: Better torrent card display with quality badges
+- **Download UX**: Clear feedback on download status and save location
+- **Logging**: Detailed logging for debugging and monitoring
+
+#### Technical Improvements
+- **API Integration**: Robust Prowlarr and qBittorrent API handling
+- **Data Normalization**: Consistent torrent data structure
+- **Session Management**: Proper qBittorrent authentication handling
+- **Configuration**: Environment-based API key management
+- **Docker Setup**: Updated volumes for proper file organization
+
+#### Security
+- **Authentication**: Secure API key handling with environment variables
+- **qBittorrent Config**: Disabled authentication for local development
+- **Error Sanitization**: Safe error messages without sensitive data
+
+#### Fixed
+- **Category Parsing**: Fixed bug in category ID handling from Prowlarr
+- **Search Results**: Resolved "no results found" issue with proper API integration
+- **Download Paths**: Corrected file saving to specified directories
+
+---
+
 ## [0.1.0] - 2025-06-29
 
 ### Sprint 1: Project Foundation & Jellyfin-Inspired UI
@@ -63,8 +105,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-### Coming in Sprint 2
-- Prowlarr API integration
-- Real torrent search results
-- Torrent data parsing and normalization
-- Enhanced result display with torrent details 
+### Coming in Sprint 3
+- TMDb API integration for metadata enrichment
+- Movie/show posters and descriptions
+- Title cleaning from torrent names
+- Enhanced UI with rich media display 

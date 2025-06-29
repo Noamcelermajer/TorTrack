@@ -247,4 +247,45 @@ button:focus {
     .media-card .info {
         padding: 8px;
     }
-} 
+}
+
+/* Torrent-specific styles */
+.media-card .poster-container.torrent-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0f0f0f;
+}
+
+/* Torrent info display */
+.media-card .torrent-info {
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+/* Quality badge */
+.quality-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: var(--jellyfin-purple);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    z-index: 10;
+}
+
+/* Seeder/Leecher indicators */
+.seed-health {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 11px;
+}
+
+.seed-health.good { color: #10b981; }
+.seed-health.medium { color: #f59e0b; }
+.seed-health.poor { color: #ef4444; } 
