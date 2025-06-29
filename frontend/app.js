@@ -64,23 +64,36 @@ function displayResults(results) {
 
 // Create a Jellyfin-style result card
 function createResultCard(result) {
-    const defaultPoster = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300"%3E%3Crect fill="%23101010" width="200" height="300"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23666" font-family="sans-serif" font-size="16"%3ENo Image%3C/text%3E%3C/svg%3E';
+    // Use a film icon as default for torrents
+    const torrentIcon = `
+        <svg class="w-16 h-16 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"></path>
+        </svg>
+    `;
+    
+    // Determine seeder health color
+    const seederColor = result.seeders > 10 ? 'text-green-500' : 
+                       result.seeders > 5 ? 'text-yellow-500' : 
+                       'text-red-500';
+    
+    // Escape single quotes in data for onclick
+    const safeTitle = (result.title || '').replace(/'/g, "\\'");
+    const safeCategory = (result.category || '').replace(/'/g, "\\'");
+    const safeMagnet = (result.magnet_link || result.download_url || '').replace(/'/g, "\\'");
     
     return `
         <div class="media-card group">
-            <div class="poster-container">
-                <img 
-                    src="${result.poster || defaultPoster}" 
-                    alt="${result.title || 'Unknown Title'}"
-                    loading="lazy"
-                    onerror="this.src='${defaultPoster}'"
-                >
+            <div class="poster-container bg-gray-900 flex items-center justify-center">
+                ${torrentIcon}
+                <div class="absolute top-2 right-2 bg-jellyfin-purple text-white text-xs px-2 py-1 rounded">
+                    ${result.quality || 'Unknown'}
+                </div>
                 <div class="play-overlay">
                     <button 
-                        onclick="downloadTorrent('${(result.magnet || '').replace(/'/g, "\\'")}')"
+                        onclick="downloadTorrent('${safeMagnet}', '${safeTitle}', '${safeCategory}')"
                         class="bg-jellyfin-purple hover:bg-jellyfin-purple-dark text-white p-4 rounded-full transition-all transform hover:scale-110"
                         title="Download ${result.title || 'this item'}"
-                        ${!result.magnet ? 'disabled' : ''}
+                        ${!result.magnet_link && !result.download_url ? 'disabled' : ''}
                     >
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
@@ -90,16 +103,38 @@ function createResultCard(result) {
             </div>
             <div class="info">
                 <h3 class="title" title="${result.title || 'Unknown Title'}">${result.title || 'Unknown Title'}</h3>
-                <p class="year">${result.year || 'Year Unknown'}</p>
+                <div class="text-xs text-gray-400 space-y-1 mt-2">
+                    <div class="flex justify-between">
+                        <span>${result.category || 'Unknown'}</span>
+                        <span>${result.size || '0 MB'}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-500">${result.indexer || 'Unknown'}</span>
+                        <div class="flex items-center space-x-2">
+                            <span class="${seederColor}" title="Seeders">
+                                <svg class="w-3 h-3 inline" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M3.293 9.707a1 1 0 010-1.414l6-6a1 1 0 011.414 0l6 6a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L4.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                ${result.seeders || 0}
+                            </span>
+                            <span class="text-red-500" title="Leechers">
+                                <svg class="w-3 h-3 inline" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 10.293a1 1 0 010 1.414l-6 6a1 1 0 01-1.414 0l-6-6a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l4.293-4.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                                ${result.leechers || 0}
+                            </span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     `;
 }
 
 // Handle download button click
-async function downloadTorrent(magnetLink) {
+async function downloadTorrent(magnetLink, title, category) {
     if (!magnetLink) {
-        showError('No magnet link available for this item.');
+        showError('No magnet link available for this torrent.');
         return;
     }
     
@@ -109,7 +144,11 @@ async function downloadTorrent(magnetLink) {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ magnet: magnetLink }),
+            body: JSON.stringify({ 
+                magnet: magnetLink,
+                title: title || 'Unknown',
+                category: category || 'Unknown'
+            }),
         });
         
         if (!response.ok) {
@@ -117,7 +156,12 @@ async function downloadTorrent(magnetLink) {
         }
         
         const data = await response.json();
-        showSuccess('Download started successfully!');
+        
+        if (data.success) {
+            showSuccess(data.message || 'Download started successfully!');
+        } else {
+            showError(data.error || 'Download failed');
+        }
     } catch (error) {
         showError(`Download error: ${error.message}`);
         console.error('Download error:', error);
