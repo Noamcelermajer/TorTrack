@@ -27,7 +27,7 @@ The goal is to offer a clean and reliable way to manage torrent downloads remote
   - Year
   - Poster image
   - Short plot/description
-- “Download” button per result
+- "Download" button per result
 - Optional: Status feedback (e.g., "Download started")
 
 #### Technologies:
@@ -43,7 +43,7 @@ The goal is to offer a clean and reliable way to manage torrent downloads remote
 
 #### Responsibilities:
 - Accept search queries from frontend
-- Query one or more torrent indexers (e.g., 1337x, YTS, or Jackett) and return torrent results
+- Query **Prowlarr** API to search across multiple torrent indexers and return torrent results
 - Fetch metadata (poster, overview, year) from TMDb or OMDb API
 - Normalize and enrich search results with metadata
 - Trigger download via qBittorrent Web API when requested
@@ -51,7 +51,7 @@ The goal is to offer a clean and reliable way to manage torrent downloads remote
 #### Technologies:
 - Python (Flask / FastAPI) or Node.js (Express)
 - RESTful API design
-- API key config for TMDb / OMDb
+- API key config for TMDb / OMDb and Prowlarr
 - Environment variable or config file for qBittorrent credentials
 
 ---
@@ -60,14 +60,14 @@ The goal is to offer a clean and reliable way to manage torrent downloads remote
 
 **Purpose:** Source magnet links or torrent files for requested media.
 
-#### Options:
-- **Public scraper**: Scrape 1337x, Pirate Bay, or YTS directly (requires HTML parsing)
-- **Jackett**: Proxy access to many torrent sites via a unified API
-  - Needs to be set up separately and its API endpoint integrated
+#### Approach:
+- Use **Prowlarr** as a unified torrent indexer proxy, aggregating results from multiple torrent indexers via a single API
+- Requires running and configuring Prowlarr separately
+- Your backend queries Prowlarr's API for torrent search results, eliminating the need for direct site scraping
 
 #### Requirements:
-- Title-matching logic to clean and format names
-- Torrent result ranking: seeds/peers, resolution, size
+- Handle Prowlarr API authentication and query formatting
+- Normalize torrent results (title cleaning, ranking by seeds/peers, resolution, size)
 
 ---
 
@@ -114,9 +114,11 @@ The goal is to offer a clean and reliable way to manage torrent downloads remote
 
 ## 🔒 Security Considerations
 
+- API keys are stored in `.env` files that are excluded from Git
 - Protect access to the interface with basic auth or IP filtering
 - Ensure qBittorrent Web API is not exposed publicly without protection
 - Do not log sensitive information (e.g., API keys, magnet links)
+- See `API_KEYS.md` for secure API key setup instructions
 
 ---
 
