@@ -3,7 +3,8 @@ from flask_cors import CORS
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
+# Load environment variables from .env file
+# This will load from backend/.env in development or /app/.env in Docker
 load_dotenv()
 
 app = Flask(__name__, static_folder='../frontend', static_url_path='')

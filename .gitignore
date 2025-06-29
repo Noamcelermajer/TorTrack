@@ -18,6 +18,7 @@ instance/
 .env.local
 .env.*.local
 config/.env
+backend/.env
 
 # IDEs
 .vscode/
