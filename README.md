@@ -4,9 +4,10 @@
 
 A lightweight, self-hosted web application that enables users to:
 
-- Search for movies or TV shows
-- View metadata (posters, release year, overview)
+- Search for movies or TV shows across 275+ torrent indexers via Prowlarr
+- View torrent details (quality, size, seeders, category)
 - Download content via magnet links using qBittorrent Web API
+- Automatic file organization (TV shows → C:/shows, Movies → C:/movies)
 - Use on mobile or desktop browsers
 - Integrate with existing media server setups like Jellyfin
 
@@ -23,17 +24,18 @@ The goal is to offer a clean and reliable way to manage torrent downloads remote
 #### Features:
 - Search bar for movie/show titles
 - Display search results with:
-  - Title
-  - Year
-  - Poster image
-  - Short plot/description
-- "Download" button per result
-- Optional: Status feedback (e.g., "Download started")
+  - Title and quality badges (4K, 1080p, BluRay, etc.)
+  - File size and category
+  - Seeder/leecher counts with health indicators
+  - Indexer information
+- "Download" button per result with automatic categorization
+- Success/error feedback messages
+- Responsive design for mobile devices
 
 #### Technologies:
-- HTML + CSS (Tailwind, Bootstrap, or similar)
-- JavaScript (plain or with a lightweight framework like Alpine.js or Vue if needed)
-- Responsive design for mobile devices
+- HTML + CSS (Tailwind CSS)
+- Vanilla JavaScript
+- Jellyfin-inspired dark theme
 
 ---
 
@@ -44,67 +46,59 @@ The goal is to offer a clean and reliable way to manage torrent downloads remote
 #### Responsibilities:
 - Accept search queries from frontend
 - Query **Prowlarr** API to search across multiple torrent indexers and return torrent results
-- Fetch metadata (poster, overview, year) from TMDb or OMDb API
-- Normalize and enrich search results with metadata
-- Trigger download via qBittorrent Web API when requested
+- Parse and normalize torrent results from Prowlarr response
+- Trigger download via qBittorrent Web API with automatic categorization
+- Handle error cases and provide feedback
 
 #### Technologies:
-- Python (Flask / FastAPI) or Node.js (Express)
+- Python (Flask 3.0)
 - RESTful API design
-- API key config for TMDb / OMDb and Prowlarr
-- Environment variable or config file for qBittorrent credentials
+- API key config for Prowlarr and TMDb
+- Environment variable configuration
 
 ---
 
-### 3. **Torrent Indexer Integration**
+### 3. **Prowlarr Integration**
 
 **Purpose:** Source magnet links or torrent files for requested media.
 
 #### Approach:
 - Use **Prowlarr** as a unified torrent indexer proxy, aggregating results from multiple torrent indexers via a single API
 - Requires running and configuring Prowlarr separately
-- Your backend queries Prowlarr's API for torrent search results, eliminating the need for direct site scraping
+- Your backend queries Prowlarr's API for torrent search results
+- Returns top 50 results sorted by quality and seeders
 
-#### Requirements:
-- Handle Prowlarr API authentication and query formatting
-- Normalize torrent results (title cleaning, ranking by seeds/peers, resolution, size)
-
----
-
-### 4. **Metadata Fetching**
-
-**Purpose:** Enhance UI with recognizable data like images, synopsis, and release date.
-
-#### Options:
-- **TMDb API** (preferred for rich images and structure)
-- **OMDb API** (simpler JSON structure, limited image support)
-
-#### Workflow:
-- Clean title from torrent filename (e.g. `Movie.2024.1080p`) to `Movie`
-- Query metadata API
-- Extract and return: poster URL, title, year, overview
+#### Features:
+- Real-time search across 275+ indexers
+- Quality detection (4K, 1080p, BluRay, WEB-DL, etc.)
+- Category parsing and normalization
+- Seeder health assessment
 
 ---
 
-### 5. **qBittorrent Integration**
+### 4. **qBittorrent Integration**
 
 **Purpose:** Automatically download magnet links through the local or remote qBittorrent client.
 
-#### Requirements:
+#### Features:
 - Authenticate with qBittorrent Web API
-- Submit magnet link with optional category/path
-- Handle basic error cases (e.g., invalid link, auth failure)
-- Optional: Return download status to frontend
+- Submit magnet link with automatic categorization
+- Sequential download with first/last piece priority
+- Smart file organization:
+  - TV shows → C:/shows
+  - Movies → C:/movies
+- Handle basic error cases and provide feedback
 
 ---
 
-### 6. **Deployment & Networking**
+### 5. **Deployment & Networking**
 
 #### Requirements:
 - Dockerized app with:
   - API server
   - Static frontend
-- Runs alongside Jellyfin on the same machine or server
+  - qBittorrent client
+- Runs alongside Prowlarr on the same machine or server
 - Can be exposed securely via:
   - **Ngrok** (on-demand public access)
   - **Nginx reverse proxy** (if self-hosted with domain)
@@ -122,15 +116,87 @@ The goal is to offer a clean and reliable way to manage torrent downloads remote
 
 ---
 
-## 🚀 Optional Enhancements
+## 🚀 Current Status (Sprint 2 Complete)
 
-- Download history or queue tracking
-- Torrent health stats (seeds/peers) in UI
-- Category selection (e.g., Movies vs TV)
-- Integration with Jellyfin to trigger metadata refresh or media scan
-- Persistent metadata caching (e.g., SQLite or Redis)
-- Notifications (Telegram, Pushover, etc.)
+### ✅ Implemented Features:
+- **Prowlarr Integration**: Full API integration for real torrent search
+- **Smart Downloads**: Automatic categorization with proper file paths
+- **Search Optimization**: Top 50 results with quality-based sorting
+- **Enhanced UI**: Quality badges, seeder indicators, better feedback
+- **Sequential Downloads**: First/last piece priority for faster streaming
+- **Error Handling**: Comprehensive error handling and logging
+
+### 🔜 Coming in Sprint 3:
+- TMDb metadata integration for posters and descriptions
+- Title cleaning from torrent names
+- Enhanced UI with rich media display
 
 ---
 
-## 📁 Folder Structure (Conceptual)
+## 📁 Folder Structure
+
+```
+TorTrack/
+├── backend/
+│   ├── app.py              # Flask API with Prowlarr + qBittorrent integration
+│   ├── requirements.txt    # Python dependencies
+│   └── Dockerfile         # Backend container config
+├── frontend/
+│   ├── index.html         # Jellyfin-style UI
+│   ├── app.js            # Frontend logic with torrent display
+│   └── styles.css        # Custom Jellyfin-inspired styles
+├── config/
+│   └── qbittorrent/
+│       └── qBittorrent.conf # qBittorrent configuration
+├── PR_Messages/          # Documentation folder
+├── docker-compose.yml    # Multi-container orchestration
+├── .gitignore           # Git exclusions
+├── README.md            # Project overview
+├── SETUP.md            # Setup instructions
+├── API_KEYS.md         # API key guide
+└── Sprints.md          # Development plan
+```
+
+---
+
+## 🛠️ Quick Start
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/TorTrack.git
+   cd TorTrack
+   ```
+
+2. **Configure API keys**
+   - Copy `.env.example` to `.env`
+   - Add your Prowlarr and TMDb API keys
+   - See `API_KEYS.md` for detailed instructions
+
+3. **Start the application**
+   ```bash
+   docker-compose up -d --build
+   ```
+
+4. **Access the application**
+   - TorTrack Web UI: http://localhost:5000
+   - qBittorrent Web UI: http://localhost:8080
+
+---
+
+## 📋 Requirements
+
+- Docker and Docker Compose
+- Prowlarr running on localhost:9696
+- API keys for Prowlarr and TMDb
+- C:/shows and C:/movies directories (auto-created)
+
+---
+
+## 🎯 Features
+
+- **Real-time Search**: Search across 275+ torrent indexers
+- **Smart Categorization**: Automatic TV/Movie organization
+- **Quality Detection**: 4K, 1080p, BluRay, WEB-DL detection
+- **Sequential Downloads**: Faster streaming with piece prioritization
+- **Responsive Design**: Works on mobile and desktop
+- **Jellyfin-inspired UI**: Beautiful dark theme with purple accents
