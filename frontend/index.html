@@ -47,25 +47,66 @@
         <!-- Search Section -->
         <div class="mb-8">
             <h2 class="text-3xl font-light mb-6">Search Media</h2>
-            <form id="searchForm" class="flex gap-3 max-w-3xl">
-                <div class="relative flex-1">
-                    <input 
-                        type="text" 
-                        id="searchInput" 
-                        placeholder="Search for torrents..."
-                        class="w-full px-5 py-3 bg-jellyfin-card border border-gray-800 rounded-full focus:outline-none focus:border-jellyfin-purple text-white placeholder-gray-500 pr-12"
-                        required
+            <form id="searchForm" class="space-y-4 max-w-4xl">
+                <div class="flex gap-3">
+                    <div class="relative flex-1">
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            placeholder="Search for torrents..."
+                            class="w-full px-5 py-3 bg-jellyfin-card border border-gray-800 rounded-full focus:outline-none focus:border-jellyfin-purple text-white placeholder-gray-500 pr-12"
+                            required
+                        >
+                        <svg class="absolute right-4 top-3.5 w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                    <button 
+                        type="submit" 
+                        class="px-8 py-3 bg-jellyfin-purple text-white rounded-full hover:bg-jellyfin-purple-dark transition-all font-medium shadow-lg hover:shadow-xl"
                     >
-                    <svg class="absolute right-4 top-3.5 w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
+                        Search
+                    </button>
+                    <button 
+                        type="button" 
+                        id="filterToggleBtn"
+                        class="px-4 py-3 bg-gray-700 text-white rounded-full hover:bg-gray-600 transition-all font-medium"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"></path>
+                        </svg>
+                    </button>
                 </div>
-                <button 
-                    type="submit" 
-                    class="px-8 py-3 bg-jellyfin-purple text-white rounded-full hover:bg-jellyfin-purple-dark transition-all font-medium shadow-lg hover:shadow-xl"
-                >
-                    Search
-                </button>
+                
+                <!-- Collapsible Filters Section -->
+                <div id="filtersSection" class="hidden bg-jellyfin-card border border-gray-800 rounded-lg p-4">
+                    <h3 class="text-lg font-medium text-gray-300 mb-4">Quick Filters</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Size Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Size Order</label>
+                            <select id="sizeFilter" class="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-md text-white text-sm focus:outline-none focus:border-jellyfin-purple">
+                                <option value="">Any Size</option>
+                                <option value="desc">Largest First</option>
+                                <option value="asc">Smallest First</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Seeders Filter -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-400 mb-2">Min Seeders</label>
+                            <select id="seedersFilter" class="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-md text-white text-sm focus:outline-none focus:border-jellyfin-purple">
+                                <option value="">Any Seeders</option>
+                                <option value="1">1+</option>
+                                <option value="5">5+</option>
+                                <option value="10">10+</option>
+                                <option value="20">20+</option>
+                                <option value="50">50+</option>
+                                <option value="100">100+</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
             </form>
         </div>
 
@@ -91,9 +132,22 @@
 
         <!-- Results Section -->
         <div id="resultsSection" class="hidden">
-            <h2 class="text-2xl font-light mb-6 text-gray-300">Search Results</h2>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-light text-gray-300">Search Results</h2>
+                <div class="text-sm text-gray-400">
+                    <span id="resultCount">0</span> results found
+                </div>
+            </div>
             <div id="results" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                 <!-- Results will be populated here -->
+            </div>
+            <div id="loadMoreSection" class="hidden mt-8 text-center">
+                <button 
+                    id="loadMoreBtn" 
+                    class="px-6 py-3 bg-jellyfin-purple text-white rounded-lg hover:bg-jellyfin-purple-dark transition-all font-medium"
+                >
+                    Load More Results
+                </button>
             </div>
         </div>
 
@@ -103,6 +157,18 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 16h4m10 0h4"></path>
             </svg>
             <p class="text-gray-500 text-lg">Search for torrents to download</p>
+        </div>
+
+        <!-- Search Results Section -->
+        <div class="mb-8">
+            <div id="loading" class="hidden text-center py-12">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-jellyfin-purple"></div>
+                <div class="text-gray-400 mt-2">Searching...</div>
+            </div>
+            
+            <div id="searchResults" class="space-y-4">
+                <!-- Results will be populated here -->
+            </div>
         </div>
     </main>
 
