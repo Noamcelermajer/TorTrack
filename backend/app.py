@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 # This will load from backend/.env in development or /app/.env in Docker
 load_dotenv()
 
-app = Flask(__name__, static_folder='../frontend', static_url_path='')
+app = Flask(__name__, static_folder='./frontend' if os.path.exists('./frontend') else '../frontend', static_url_path='')
 CORS(app)
 
 # Configuration
@@ -22,7 +22,7 @@ app.config['QBITTORRENT_PASSWORD'] = os.getenv('QBITTORRENT_PASSWORD', 'adminpas
 @app.route('/')
 def index():
     """Serve the frontend application"""
-    return send_from_directory('../frontend', 'index.html')
+    return send_from_directory(app.static_folder, 'index.html')
 
 
 @app.route('/api/health')

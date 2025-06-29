@@ -4,10 +4,7 @@
 
 ### 1. Configure Environment Variables
 ```bash
-# Copy the environment template
-cp env.example .env
-
-# Edit .env with your actual API keys
+# Create a .env file with your API keys
 # See API_KEYS.md for detailed instructions on getting API keys
 ```
 
@@ -26,9 +23,7 @@ docker-compose up -d
 ```bash
 cd backend
 
-# Copy environment template
-cp env.example .env
-# Edit .env with your API keys
+# Create .env file with your API keys
 
 # Setup Python environment
 python -m venv venv

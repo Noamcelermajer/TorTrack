@@ -2,9 +2,11 @@
 const searchForm = document.getElementById('searchForm');
 const searchInput = document.getElementById('searchInput');
 const resultsContainer = document.getElementById('results');
+const resultsSection = document.getElementById('resultsSection');
 const loadingDiv = document.getElementById('loading');
 const errorDiv = document.getElementById('error');
 const errorMessage = document.getElementById('errorMessage');
+const emptyState = document.getElementById('emptyState');
 
 // API base URL (will be same origin in production)
 const API_URL = window.location.origin;
@@ -19,6 +21,8 @@ searchForm.addEventListener('submit', async (e) => {
     // Clear previous results and errors
     resultsContainer.innerHTML = '';
     hideError();
+    hideEmptyState();
+    hideResults();
     
     // Show loading state
     showLoading();
@@ -42,6 +46,7 @@ searchForm.addEventListener('submit', async (e) => {
         if (data.results && data.results.length > 0) {
             displayResults(data.results);
         } else {
+            showEmptyState();
             showError('No results found. Try a different search term.');
         }
     } catch (error) {
@@ -53,31 +58,39 @@ searchForm.addEventListener('submit', async (e) => {
 
 // Display search results
 function displayResults(results) {
+    showResults();
     resultsContainer.innerHTML = results.map(result => createResultCard(result)).join('');
 }
 
-// Create a result card HTML
+// Create a Jellyfin-style result card
 function createResultCard(result) {
-    // Placeholder card design - will be enhanced in Sprint 3 with metadata
+    const defaultPoster = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300"%3E%3Crect fill="%23101010" width="200" height="300"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23666" font-family="sans-serif" font-size="16"%3ENo Image%3C/text%3E%3C/svg%3E';
+    
     return `
-        <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow">
-            <div class="aspect-[2/3] bg-gray-700 flex items-center justify-center">
-                ${result.poster ? 
-                    `<img src="${result.poster}" alt="${result.title}" class="w-full h-full object-cover">` :
-                    `<span class="text-gray-500">No Image</span>`
-                }
-            </div>
-            <div class="p-4">
-                <h3 class="font-bold text-lg mb-2 line-clamp-2">${result.title || 'Unknown Title'}</h3>
-                <p class="text-gray-400 text-sm mb-2">${result.year || 'Year Unknown'}</p>
-                <p class="text-gray-300 text-sm line-clamp-3 mb-4">${result.overview || 'No description available.'}</p>
-                <button 
-                    onclick="downloadTorrent('${result.magnet || ''}')"
-                    class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors"
-                    ${!result.magnet ? 'disabled' : ''}
+        <div class="media-card group">
+            <div class="poster-container">
+                <img 
+                    src="${result.poster || defaultPoster}" 
+                    alt="${result.title || 'Unknown Title'}"
+                    loading="lazy"
+                    onerror="this.src='${defaultPoster}'"
                 >
-                    Download
-                </button>
+                <div class="play-overlay">
+                    <button 
+                        onclick="downloadTorrent('${(result.magnet || '').replace(/'/g, "\\'")}')"
+                        class="bg-jellyfin-purple hover:bg-jellyfin-purple-dark text-white p-4 rounded-full transition-all transform hover:scale-110"
+                        title="Download ${result.title || 'this item'}"
+                        ${!result.magnet ? 'disabled' : ''}
+                    >
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="info">
+                <h3 class="title" title="${result.title || 'Unknown Title'}">${result.title || 'Unknown Title'}</h3>
+                <p class="year">${result.year || 'Year Unknown'}</p>
             </div>
         </div>
     `;
@@ -104,12 +117,31 @@ async function downloadTorrent(magnetLink) {
         }
         
         const data = await response.json();
-        // TODO: Show success notification in Sprint 4
-        alert('Download started successfully!');
+        showSuccess('Download started successfully!');
     } catch (error) {
         showError(`Download error: ${error.message}`);
         console.error('Download error:', error);
     }
+}
+
+// Show success notification (Jellyfin style)
+function showSuccess(message) {
+    // Create toast notification
+    const toast = document.createElement('div');
+    toast.className = 'fixed bottom-4 right-4 bg-green-800/90 backdrop-blur-sm text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3 z-50';
+    toast.innerHTML = `
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span>${message}</span>
+    `;
+    document.body.appendChild(toast);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        toast.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
 
 // UI helper functions
@@ -129,4 +161,35 @@ function showError(message) {
 function hideError() {
     errorDiv.classList.add('hidden');
     errorMessage.textContent = '';
-} 
+}
+
+function showResults() {
+    resultsSection.classList.remove('hidden');
+}
+
+function hideResults() {
+    resultsSection.classList.add('hidden');
+}
+
+function showEmptyState() {
+    emptyState.classList.remove('hidden');
+}
+
+function hideEmptyState() {
+    emptyState.classList.add('hidden');
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', () => {
+    // Focus search input
+    searchInput.focus();
+    
+    // Add keyboard shortcut for search (Ctrl+K or Cmd+K)
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            searchInput.focus();
+            searchInput.select();
+        }
+    });
+}); 

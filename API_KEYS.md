@@ -4,34 +4,62 @@
 
 This project uses environment variables to keep API keys secure and out of version control.
 
+⚠️ **IMPORTANT**: Never put actual API keys in any file that gets committed to Git!
+
 ## Setup Instructions
 
 ### For Docker (Recommended)
 
-1. **Copy the environment template:**
-   ```bash
-   cp env.example .env
+1. **Create a `.env` file in the root directory with:**
+   ```
+   PROWLARR_API_KEY=your_api_key_here
+   TMDB_API_KEY=your_api_key_here
+   QBITTORRENT_USERNAME=admin
+   QBITTORRENT_PASSWORD=your_password_here
    ```
 
-2. **Edit `.env` file with your actual API keys:**
-   ```bash
-   # Open with your favorite editor
-   nano .env  # or vim, code, notepad, etc.
-   ```
-
-3. **Fill in your API keys:**
+2. **Fill in your API keys:**
    - `PROWLARR_API_KEY`: Get from Prowlarr Settings → General → API Key
    - `TMDB_API_KEY`: Get from https://www.themoviedb.org/settings/api
    - `QBITTORRENT_PASSWORD`: Change this to a secure password
 
 ### For Local Development
 
-1. **Copy the backend environment template:**
-   ```bash
-   cp backend/env.example backend/.env
+1. **Create a `backend/.env` file with:**
+   ```
+   PROWLARR_URL=http://localhost:9696
+   PROWLARR_API_KEY=your_api_key_here
+   TMDB_API_KEY=your_api_key_here
+   QBITTORRENT_URL=http://localhost:8080
+   QBITTORRENT_USERNAME=admin
+   QBITTORRENT_PASSWORD=adminpass
+   FLASK_ENV=development
+   FLASK_DEBUG=1
    ```
 
-2. **Edit `backend/.env` with your API keys**
+## Required .env Format
+
+Your `backend/.env` file should look like this (with your actual keys):
+
+```bash
+# Prowlarr Configuration
+PROWLARR_URL=http://localhost:9696
+PROWLARR_API_KEY=<your-actual-prowlarr-key>
+
+# TMDb Configuration  
+TMDB_API_KEY=<your-actual-tmdb-key>
+
+# qBittorrent Configuration
+QBITTORRENT_URL=http://localhost:8080
+QBITTORRENT_USERNAME=admin
+QBITTORRENT_PASSWORD=adminpass
+
+# Flask Configuration
+FLASK_ENV=development
+FLASK_DEBUG=1
+```
+
+⚠️ **Remember**: The `.env` files are ignored by Git, so your keys stay private!
 
 ## Getting API Keys
 
@@ -57,6 +85,7 @@ This project uses environment variables to keep API keys secure and out of versi
 - Commit `.env` files to Git
 - Share API keys in issues or pull requests
 - Use the example values in production
+- Put actual API keys in any file that gets tracked by Git
 
 ## Verification
 
